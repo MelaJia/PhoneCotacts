@@ -2,6 +2,7 @@ package cn.edu.gdmec.android.phonecotacts;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -10,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
+
 /**
  * 手机通信程序主界面
  * */
@@ -36,25 +39,40 @@ public class MyContactsActivity extends Activity {
         listViewAdapter=new BaseAdapter() {
             @Override
             public int getCount() {
-                return 0;
+                return users.length;
             }
 
             @Override
-            public Object getItem(int i) {
-                return null;
+            public Object getItem(int position) {
+                return users[position];
             }
 
             @Override
-            public long getItemId(int i) {
-                return 0;
+            public long getItemId(int position) {
+                return position;
             }
-
+//getView()逐一绘制每一行数据，返回视图
+            //convertView 用于显示每行数据的视图，首先需要判断convertView是否为空
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
-                return null;
+                if (convertView==null){
+                    TextView textView=new TextView(MyContactsActivity.this);
+                    textView.setTextSize(22);
+                    convertView=textView;
+                }
+                //适配器显示的数据源是users数组
+                String mobile=users[position].getMobile()==null?"":users[position].getMobile();
+                ((TextView)convertView).setText(users[position].getName()+"--"+mobile);
+                if (position==selectItem){
+                    convertView.setBackgroundColor(Color.YELLOW);
+                }else {
+                    convertView.setBackgroundColor(0);
+                }
+                return convertView;
             }
         };
-        //设置listview控件
+
+        //设置listview控件的适配器
         listView.setAdapter(listViewAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

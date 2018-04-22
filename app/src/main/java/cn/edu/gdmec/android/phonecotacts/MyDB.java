@@ -37,7 +37,7 @@ public class MyDB extends SQLiteOpenHelper{
 
     }
 //    执行数据库链接
-    public SQLiteDatabase openConnectuin(){
+    public SQLiteDatabase openConnection(){
         if (!db.isOpen()){
             db=getWritableDatabase();
         }
@@ -57,7 +57,9 @@ public class MyDB extends SQLiteOpenHelper{
 //    创建表
     public boolean createTable(String createTableSql){
         try{
-            openConnectuin();
+            //1、执行数据库连接
+            openConnection();
+            //2、执行语句
             db.execSQL(createTableSql);
         }catch (Exception e){
             e.printStackTrace();
@@ -73,7 +75,14 @@ public class MyDB extends SQLiteOpenHelper{
 
 
     public boolean isTableExits(String tablename) {
+        try {
+            openConnection();
+            String str = "select count(*) from tablename";
+            db.rawQuery(str, null).close();
+        }catch (Exception e){
+            return false;
+        }
 
-        return false;
+        return true;
     }
 }
