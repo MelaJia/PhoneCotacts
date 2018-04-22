@@ -20,4 +20,8 @@ public  class ContactsTable {
 //                    User.MOBILE+""
 //        }
    }
+
+    public User[] getAllUser() {
+        return new User[0];
+    }
 }
