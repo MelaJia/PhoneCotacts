@@ -1,6 +1,8 @@
 package cn.edu.gdmec.android.phonecotacts;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * 手机通信程序主界面
@@ -87,11 +90,11 @@ public class MyContactsActivity extends Activity {
 //    创建菜单
     public boolean onCreateOptionMenu(Menu menu){
         menu.add(Menu.NONE,1,Menu.NONE,"添加");
-        menu.add(Menu.NONE,2,Menu.NONE,"添加");
-        menu.add(Menu.NONE,3,Menu.NONE,"添加");
-        menu.add(Menu.NONE,4,Menu.NONE,"添加");
-        menu.add(Menu.NONE,5,Menu.NONE,"添加");
-        menu.add(Menu.NONE,6,Menu.NONE,"添加");
+        menu.add(Menu.NONE,2,Menu.NONE,"编辑");
+        menu.add(Menu.NONE,3,Menu.NONE,"查看信息");
+        menu.add(Menu.NONE,4,Menu.NONE,"删除");
+        menu.add(Menu.NONE,5,Menu.NONE,"查询");
+        menu.add(Menu.NONE,6,Menu.NONE,"导入到手机电话浦");
         menu.add(Menu.NONE,7,Menu.NONE,"退出");
         return super.onCreateOptionsMenu(menu);
 
@@ -104,14 +107,40 @@ public class MyContactsActivity extends Activity {
                 startActivity(intent);
                 break;
             case 2://编辑
+                //根据数据库ID判断当前记录是否可以操作
+                if (users[selectItem].getId_DB()>0){
+                intent=new Intent(MyContactsActivity.this,UpdateContactsActivity.class);
+                startActivity(intent);
+                }else {
+                    Toast.makeText(this, "无结果记录，无法操作", Toast.LENGTH_SHORT).show();
+                }
                 break;
             case 3://查看信息
+                if (users[selectItem].getId_DB()>0){
+                intent=new Intent(MyContactsActivity.this,ContactsMessageActivity.class);
+                intent.putExtra("user_ID",users[selectItem].getId_DB());
+                startActivity(intent);
+                }else {
+                    Toast.makeText(this, "无结果记录，无法操作！", Toast.LENGTH_SHORT).show();
+                }
                 break;
             case 4://删除
+                if (users[selectItem].getId_DB()>0){
+                delete();
+                }else{
+                    Toast.makeText(this, "无结果记录，无法操作！", Toast.LENGTH_SHORT).show();
+                }
                 break;
-            case 5:
+            case 5://查询
+                new FindDialog(this).show();
                 break;
             case 6:
+                if (users[selectItem].getId_DB()>0){
+                    importPhone(users[selectItem].getName(),users[selectItem].getMobile());
+                    Toast.makeText(this, "已结成功导入"+users[selectItem].getName()+"到手机电话薄", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(this, "无结果记录，无法操作！", Toast.LENGTH_SHORT).show();
+                }
                 break;
             case 7:
                 finish();
@@ -122,6 +151,21 @@ public class MyContactsActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private void importPhone(String name, String mobile) {
+
+    }
+
+    private void delete() {
+
+    }
+
     private void initView() {
+    }
+
+    private class FindDialog extends Dialog{
+        public FindDialog(Context context) {
+            super(context);
+        }
     }
 }
