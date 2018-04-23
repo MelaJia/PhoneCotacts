@@ -1,6 +1,8 @@
 package cn.edu.gdmec.android.phonecotacts;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -13,6 +15,7 @@ public class MyDB extends SQLiteOpenHelper{
     private static String DB_NAME="MY_DB.db";
     private static int DB_VERSION=2;
     private SQLiteDatabase db;//创建数据库对象
+
     public MyDB(Context context) {
         super(context,DB_NAME,null,DB_VERSION);
         db=getWritableDatabase();
@@ -73,11 +76,86 @@ public class MyDB extends SQLiteOpenHelper{
 
     }
 
+    /**
+     * 添加操作
+     * */
+    public boolean save(String tableName, ContentValues values){
+        try{
+            openConnection();
+            db.insert(tableName,null,values);
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }finally {
+            closeConnection();
+        }
+        return true;
+
+
+    }
+
+    /**
+     * 更新操作
+     * */
+    public boolean update(String table, ContentValues values,String whereClause,String []whereArgs){
+        try{
+            openConnection();
+            db.update(table,values,whereClause,whereArgs);
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }finally {
+            closeConnection();
+        }
+        return true;
+
+
+    }
+    /**
+     * 删除操作
+     * @param deleteSql 对应删除的条件
+     * @param obj 对应删除条件的值
+     * */
+    public boolean delete(String table, String deleteSql,String obj[]){
+        try{
+            openConnection();
+            db.delete(table,deleteSql,obj);
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }finally {
+            closeConnection();
+        }
+        return true;
+
+
+    }
+    /**
+     * 查询操作
+     *
+     * */
+    /**
+     * 添加操作
+     * */
+    public Cursor find(String findSql, String obj[]){
+        try{
+            openConnection();
+            Cursor cursor=db.rawQuery(findSql,obj);
+            return cursor;
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+
+
+
+    }
+
 
     public boolean isTableExits(String tablename) {
         try {
             openConnection();
-            String str = "select count(*) from tablename";
+            String str = "select count(*) from "+tablename;
             db.rawQuery(str, null).close();
         }catch (Exception e){
             return false;
