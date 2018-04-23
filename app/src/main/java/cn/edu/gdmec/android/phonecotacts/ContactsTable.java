@@ -33,4 +33,12 @@ public  class ContactsTable {
     public User[] getAllUser() {
         return new User[0];
     }
+    public User[] findUserByKey(String key){
+        return new User[0];
+
+    }
+
+    public boolean deleteByUser(User user) {
+        return false;
+    }
 }

@@ -1,17 +1,23 @@
 package cn.edu.gdmec.android.phonecotacts;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,7 +25,7 @@ import android.widget.Toast;
 /**
  * 手机通信程序主界面
  * */
-public class MyContactsActivity extends Activity {
+public class MyContactsActivity extends AppCompatActivity {
 //显示结果列表
     private ListView listView;
     private BaseAdapter listViewAdapter;   //ListView列表适配器
@@ -33,6 +39,7 @@ public class MyContactsActivity extends Activity {
         setTitle("通讯录");
         listView = (ListView) findViewById(R.id.listView);
         loadContacts();
+       // onCreateOptionMenu(this);
     }
 //加载联系人列表
     private void loadContacts() {
@@ -88,7 +95,9 @@ public class MyContactsActivity extends Activity {
         });
     }
 //    创建菜单
-    public boolean onCreateOptionMenu(Menu menu){
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.NONE,1,Menu.NONE,"添加");
         menu.add(Menu.NONE,2,Menu.NONE,"编辑");
         menu.add(Menu.NONE,3,Menu.NONE,"查看信息");
@@ -97,10 +106,12 @@ public class MyContactsActivity extends Activity {
         menu.add(Menu.NONE,6,Menu.NONE,"导入到手机电话浦");
         menu.add(Menu.NONE,7,Menu.NONE,"退出");
         return super.onCreateOptionsMenu(menu);
-
     }
+
 //    菜单点击事件
-    public boolean onOptionItemSelected(MenuItem item){
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
             case 1://添加
                 Intent intent=new Intent(MyContactsActivity.this,AddContactsActivity.class);
@@ -109,24 +120,24 @@ public class MyContactsActivity extends Activity {
             case 2://编辑
                 //根据数据库ID判断当前记录是否可以操作
                 if (users[selectItem].getId_DB()>0){
-                intent=new Intent(MyContactsActivity.this,UpdateContactsActivity.class);
-                startActivity(intent);
+                    intent=new Intent(MyContactsActivity.this,UpdateContactsActivity.class);
+                    startActivity(intent);
                 }else {
                     Toast.makeText(this, "无结果记录，无法操作", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case 3://查看信息
                 if (users[selectItem].getId_DB()>0){
-                intent=new Intent(MyContactsActivity.this,ContactsMessageActivity.class);
-                intent.putExtra("user_ID",users[selectItem].getId_DB());
-                startActivity(intent);
+                    intent=new Intent(MyContactsActivity.this,ContactsMessageActivity.class);
+                    intent.putExtra("user_ID",users[selectItem].getId_DB());
+                    startActivity(intent);
                 }else {
                     Toast.makeText(this, "无结果记录，无法操作！", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case 4://删除
                 if (users[selectItem].getId_DB()>0){
-                delete();
+                    delete();
                 }else{
                     Toast.makeText(this, "无结果记录，无法操作！", Toast.LENGTH_SHORT).show();
                 }
@@ -144,7 +155,7 @@ public class MyContactsActivity extends Activity {
                 break;
             case 7:
                 finish();
-              //  System.exit(0);
+                //  System.exit(0);
                 break;
             default:
                 break;
@@ -152,20 +163,109 @@ public class MyContactsActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void importPhone(String name, String mobile) {
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ContactsTable ct=new ContactsTable(this);
+        users=ct.getAllUser();
+        //刷新列表
+        listViewAdapter.notifyDataSetChanged();
     }
 
-    private void delete() {
-
-    }
 
     private void initView() {
     }
 
-    private class FindDialog extends Dialog{
+/**
+ * 查询
+ * 在主页面弹出对话框
+ * */
+    public class FindDialog extends Dialog {
+
+        private Button find;
+        private Button cancel;
+
         public FindDialog(Context context) {
             super(context);
         }
+
+
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_find);
+            setTitle("查询联系人");
+            find=findViewById(R.id.find);
+            cancel=findViewById(R.id.cancel);
+            find.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    EditText value=findViewById(R.id.value);
+                    ContactsTable ct=new ContactsTable(MyContactsActivity.this);
+                    users=ct.findUserByKey(value.getText().toString());
+                    for (int i=0;i<users.length;i++){
+                        System.out.println("姓名是"+users[i].getName()+",电话是"+users[i].getMobile());
+                    }
+                    listViewAdapter.notifyDataSetChanged();
+                    selectItem=0;
+                    dismiss();
+                }
+            });
+            cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dismiss();
+                }
+            });
+
+        }
+
     }
+    /*
+    * 删除联系人
+    * */
+    public void delete(){
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setTitle("系统信息");
+        builder.setMessage("是否删除联系人?");
+        builder.setPositiveButton("是", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                ContactsTable ct=new ContactsTable(MyContactsActivity.this);
+                //删除联系人
+                if (ct.deleteByUser(users[selectItem])){
+                    //重新获取数据
+                    users=ct.getAllUser();
+                    //刷新列表
+                    listViewAdapter.notifyDataSetChanged();
+                    selectItem=0;
+                    Toast.makeText(MyContactsActivity.this, "删除成功！", Toast.LENGTH_SHORT).show();
+
+                }else {
+                    Toast.makeText(MyContactsActivity.this, "删除失败！", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+        builder.setNegativeButton("否", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        builder.show();
+    }
+    /**
+     * 导入到手机电话薄
+     * */
+    public void importPhone(String name,String phone){
+        //系统通讯录
+      //  Uri
+    }
+
+
 }
+
+
