@@ -3,12 +3,15 @@ package cn.edu.gdmec.android.phonecotacts;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -261,8 +264,29 @@ public class MyContactsActivity extends AppCompatActivity {
      * 导入到手机电话薄
      * */
     public void importPhone(String name,String phone){
-        //系统通讯录
-      //  Uri
+        //ContactsContract.Data.CONTENT_URI表示系统联系人的URI
+       Uri phoneURL= ContactsContract.Data.CONTENT_URI;
+        ContentValues values=new ContentValues();
+        //Uri insert()向给定的URI表中插入一行数据
+        Uri rawContactUri=this.getContentResolver().insert(ContactsContract.RawContacts.CONTENT_URI,values);
+        long rawContactId= ContentUris.parseId(rawContactUri);
+        //向data表插入姓名
+        values.clear();
+        values.put(ContactsContract.Data.RAW_CONTACT_ID, rawContactId);
+        //指明联系人mime类型：ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE
+        values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
+        //指明联系人名字：ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME
+        values.put(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME, name);
+        this.getContentResolver().insert(phoneURL,values);
+
+       //向data表插入电话
+        values.clear();
+        values.put(ContactsContract.Data.RAW_CONTACT_ID,rawContactId);
+        values.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
+        values.put(ContactsContract.CommonDataKinds.Phone.NUMBER,phone);
+        values.put(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
+        this.getContentResolver().insert(phoneURL,values);
+
     }
 
 
