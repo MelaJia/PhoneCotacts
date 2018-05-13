@@ -19,18 +19,21 @@ public  class ContactsTable {
    public ContactsTable(Context context) {
         db=new MyDB(context);
         if (!db.isTableExits(TABLENAME)){
-            String  createTableSql="CREATE TABLE IF NOT EXISTS" +
-                    TABLENAME + "(id_DB integer" +
-                    "primary key AUTOINCREMENT," +
-                    User.NAME + " VARCHAR," +
-                    User.MOBILE + "VARCHAR," +
-                    User.QQ+"VARCHAR," +
-                    User.DANWEI+"VARCHAR," +
-                    User.ADDRESS+"VARCHAR" +
-                    ")";
+//            String  createTableSql="CREATE TABLE IF NOT EXISTS" +
+//                    TABLENAME + "(_id_DB integer" +
+//                    "primary key AUTOINCREMENT," +
+//                    User.NAME + " VARCHAR," +
+//                    User.MOBILE + "VARCHAR," +
+//                    User.QQ+"VARCHAR," +
+//                    User.DANWEI+"VARCHAR," +
+//                    User.ADDRESS+"VARCHAR" +
+//                    ")";
+//            "create table "TABLENAME+" (id_DB integer primary key autoincrement,"+  User.NAME+" char(20),"+ User.MOBILE+" char(20),phone char(20))"
+            String createTableSql="create table if not exists "+TABLENAME+"(_id_DB integer primary key autoincrement,"+User.NAME+" varchar(20),"+User.MOBILE+" varchar(20),"+User.QQ+" varchar(20),"+User.ADDRESS+" varchar(20),"+User.DANWEI+" varchar(20))";
             db.createTable(createTableSql);
 
         }
+        //添加到联系人表
 
    }
    public boolean addData(User user){
